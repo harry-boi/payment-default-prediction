@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Employee extends Model
 {
@@ -57,6 +58,14 @@ class Employee extends Model
     public function salaryObligations(): HasMany
     {
         return $this->hasMany(SalaryObligation::class);
+    }
+
+    /**
+     * Payments completed for this employee's salary obligations.
+     */
+    public function payments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Payment::class, SalaryObligation::class);
     }
 
     /**

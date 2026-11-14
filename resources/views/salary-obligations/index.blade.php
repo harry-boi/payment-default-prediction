@@ -125,7 +125,7 @@
                                             </a>
                                             @if (! $obligation->isPaid())
                                                 <span class="text-gray-300">|</span>
-                                                <a href="{{ url('/salary-obligations/' . $obligation->id . '/payments') }}" class="font-bold text-green-700 hover:text-green-900 hover:underline">
+                                                <a href="{{ route('salary-obligations.payments.create', $obligation) }}" class="font-bold text-green-700 hover:text-green-900 hover:underline">
                                                     Record Payment
                                                 </a>
                                             @endif

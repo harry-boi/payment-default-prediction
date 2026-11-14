@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaryObligationController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,11 @@ Route::middleware('auth')->group(function () {
 
     // Salary Obligations (Phase 3)
     Route::resource('salary-obligations', SalaryObligationController::class)->only(['index', 'create', 'store', 'show']);
+
+    // Payments & Recurrence (Phase 4)
+    Route::get('salary-obligations/{salaryObligation}/payments', [PaymentController::class, 'create'])->name('salary-obligations.payments.create');
+    Route::post('salary-obligations/{salaryObligation}/payments', [PaymentController::class, 'store'])->name('salary-obligations.payments.store');
+    Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
 });
 
 require __DIR__.'/auth.php';

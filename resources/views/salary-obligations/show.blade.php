@@ -15,7 +15,7 @@
                     &larr; Back to List
                 </a>
                 @if (! $salaryObligation->isPaid())
-                    <a href="{{ url('/salary-obligations/' . $salaryObligation->id . '/payments') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition shadow-sm">
+                    <a href="{{ route('salary-obligations.payments.create', $salaryObligation) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition shadow-sm">
                         Record Payment
                     </a>
                 @endif
@@ -67,6 +67,41 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Settlement & Payment Details (If Paid) -->
+            @php $latestPayment = $salaryObligation->payments()->latest('paid_at')->first(); @endphp
+            @if ($salaryObligation->isPaid() && $latestPayment)
+                <div class="bg-white shadow-sm rounded-xl border border-green-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-green-50 border-b border-green-100 flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <h3 class="font-bold text-sm text-green-900">Payment Settlement Record</h3>
+                        </div>
+                        <x-status-badge :status="$latestPayment->status->value" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6 text-sm">
+                        <div>
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Amount Disbursed</span>
+                            <span class="font-bold text-gray-900 text-base mt-1 block">{{ $latestPayment->formatted_amount }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Disbursed Date</span>
+                            <span class="font-semibold text-gray-900 mt-1 block">{{ $latestPayment->paid_at->format('M d, Y') }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Delay Classification</span>
+                            <span class="font-semibold mt-1 block {{ $latestPayment->isOnTime() ? 'text-green-700' : 'text-red-700' }}">
+                                {{ $latestPayment->isOnTime() ? '0 days delay (On Time)' : "{$latestPayment->delay_days} days late" }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Receipt / Reference</span>
+                            <span class="font-mono text-gray-800 mt-1 block">{{ $latestPayment->reference ?: 'None recorded' }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Employee Card -->
             <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
