@@ -27,6 +27,9 @@
                 </header>
             @endisset
 
+            <!-- Flash Messages -->
+            <x-flash-messages />
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}
