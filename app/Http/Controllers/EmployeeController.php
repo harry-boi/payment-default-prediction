@@ -6,12 +6,13 @@ use App\Enums\EmployeeStatus;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Services\ObligationStatusSync;
 use App\Support\Money;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class EmployeeController extends Controller
@@ -52,13 +53,15 @@ class EmployeeController extends Controller
                 'status' => EmployeeStatus::Active,
             ]);
 
-            // Section 6.4: If a date is given and table exists, create the employee's first obligation
-            if (! empty($request->validated('first_payment_date')) && Schema::hasTable('salary_obligations')) {
+            // Section 6.4: If a date is given, create the employee's first obligation in the same transaction
+            if (! empty($request->validated('first_payment_date'))) {
+                $dueDate = Carbon::parse($request->validated('first_payment_date'));
                 $employee->salaryObligations()->create([
                     'amount' => $employee->salary_amount,
-                    'due_date' => $request->validated('first_payment_date'),
+                    'due_date' => $dueDate->toDateString(),
                     'frequency' => $employee->salary_frequency->value,
-                    'status' => 'upcoming',
+                    'status' => ObligationStatusSync::determineStatus($dueDate),
+                    'payment_period' => $dueDate->format('F Y'),
                 ]);
             }
 

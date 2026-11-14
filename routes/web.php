@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SalaryObligationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,9 @@ Route::middleware('auth')->group(function () {
     // Employee Management (Phase 2)
     Route::resource('employees', EmployeeController::class)->except(['destroy']);
     Route::patch('employees/{employee}/status', [EmployeeController::class, 'toggleStatus'])->name('employees.status');
+
+    // Salary Obligations (Phase 3)
+    Route::resource('salary-obligations', SalaryObligationController::class)->only(['index', 'create', 'store', 'show']);
 });
 
 require __DIR__.'/auth.php';
