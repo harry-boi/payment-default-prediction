@@ -1,7 +1,5 @@
 <?php
 
-uses(TestCase::class, RefreshDatabase::class);
-
 use App\Enums\EmployeeStatus;
 use App\Enums\ObligationStatus;
 use App\Enums\PaymentStatus;
@@ -12,6 +10,8 @@ use App\Models\User;
 use App\Services\PaymentRecorder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+
+uses(TestCase::class, RefreshDatabase::class);
 
 test('recorder rejects already paid obligation', function () {
     $user = User::factory()->create();
