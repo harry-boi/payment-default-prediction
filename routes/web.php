@@ -5,6 +5,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RiskAssessmentController;
 use App\Http\Controllers\SalaryObligationController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
     Route::patch('reminders/{reminder}/read', [ReminderController::class, 'markAsRead'])->name('reminders.read');
     Route::post('reminders/read-all', [ReminderController::class, 'markAllAsRead'])->name('reminders.read-all');
+
+    // Reports (Phase 8)
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 });
 
 require __DIR__.'/auth.php';
