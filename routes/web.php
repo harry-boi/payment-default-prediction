@@ -3,6 +3,7 @@
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RiskAssessmentController;
 use App\Http\Controllers\SalaryObligationController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function () {
     Route::get('salary-obligations/{salaryObligation}/payments', [PaymentController::class, 'create'])->name('salary-obligations.payments.create');
     Route::post('salary-obligations/{salaryObligation}/payments', [PaymentController::class, 'store'])->name('salary-obligations.payments.store');
     Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+
+    // Risk Assessment Engine (Phase 5)
+    Route::get('risk-assessments', [RiskAssessmentController::class, 'index'])->name('risk-assessments.index');
+    Route::post('salary-obligations/{salaryObligation}/risk-assessment', [RiskAssessmentController::class, 'runAssessment'])->name('salary-obligations.risk-assessment');
 });
 
 require __DIR__.'/auth.php';

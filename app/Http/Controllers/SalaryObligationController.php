@@ -7,6 +7,7 @@ use App\Http\Requests\StoreSalaryObligationRequest;
 use App\Models\Employee;
 use App\Models\SalaryObligation;
 use App\Services\ObligationStatusSync;
+use App\Services\RiskAssessmentService;
 use App\Support\Money;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,7 @@ class SalaryObligationController extends Controller
 
         $query = SalaryObligation::whereHas('employee', function ($q) use ($user) {
             $q->where('user_id', $user->id);
-        })->with('employee');
+        })->with(['employee', 'latestRiskAssessment']);
 
         // Filter by status (upcoming, overdue, paid)
         if ($status = $request->query('status')) {
@@ -90,6 +91,8 @@ class SalaryObligationController extends Controller
             'payment_period' => $period,
             'notes' => $request->validated('notes'),
         ]);
+
+        app(RiskAssessmentService::class)->assess($obligation);
 
         return redirect()
             ->route('salary-obligations.index')

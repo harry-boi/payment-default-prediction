@@ -78,6 +78,7 @@
                                     <th scope="col" class="px-6 py-3.5">Due Date</th>
                                     <th scope="col" class="px-6 py-3.5">Period</th>
                                     <th scope="col" class="px-6 py-3.5">Frequency</th>
+                                    <th scope="col" class="px-6 py-3.5">Risk Level</th>
                                     <th scope="col" class="px-6 py-3.5">Status</th>
                                     <th scope="col" class="px-6 py-3.5 text-right">Actions</th>
                                 </tr>
@@ -115,6 +116,13 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-600">
                                             {{ $obligation->frequency->label() }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if ($obligation->latestRiskAssessment)
+                                                <x-risk-badge :level="$obligation->latestRiskAssessment->risk_level->value" :score="$obligation->latestRiskAssessment->score" />
+                                            @else
+                                                <span class="text-xs text-gray-400 italic">Unassessed</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <x-status-badge :status="$obligation->status->value" />

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Services\ObligationStatusSync;
+use App\Services\RiskAssessmentService;
 use App\Support\Money;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -56,13 +57,15 @@ class EmployeeController extends Controller
             // Section 6.4: If a date is given, create the employee's first obligation in the same transaction
             if (! empty($request->validated('first_payment_date'))) {
                 $dueDate = Carbon::parse($request->validated('first_payment_date'));
-                $employee->salaryObligations()->create([
+                $firstObligation = $employee->salaryObligations()->create([
                     'amount' => $employee->salary_amount,
                     'due_date' => $dueDate->toDateString(),
                     'frequency' => $employee->salary_frequency->value,
                     'status' => ObligationStatusSync::determineStatus($dueDate),
                     'payment_period' => $dueDate->format('F Y'),
                 ]);
+
+                app(RiskAssessmentService::class)->assess($firstObligation);
             }
 
             return $employee;
