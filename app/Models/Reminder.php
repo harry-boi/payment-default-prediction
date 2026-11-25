@@ -25,6 +25,7 @@ class Reminder extends Model
         'type',
         'message',
         'is_read',
+        'emailed_at',
     ];
 
     /**
@@ -37,6 +38,7 @@ class Reminder extends Model
         return [
             'type' => ReminderType::class,
             'is_read' => 'boolean',
+            'emailed_at' => 'datetime',
         ];
     }
 
@@ -77,6 +79,14 @@ class Reminder extends Model
     public function markAsRead(): bool
     {
         return $this->update(['is_read' => true]);
+    }
+
+    /**
+     * Mark this reminder as delivered by email.
+     */
+    public function markAsEmailed(): bool
+    {
+        return $this->update(['emailed_at' => now()]);
     }
 
     /**

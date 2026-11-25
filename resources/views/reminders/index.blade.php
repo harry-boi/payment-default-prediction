@@ -5,10 +5,20 @@
                 <h2 class="font-bold text-2xl text-gray-900 leading-tight">
                     {{ __('Reminders & Alerts') }}
                 </h2>
-                <p class="text-sm text-gray-500 mt-1">Automated forward-looking payment notices and overdue default warnings.</p>
+                <p class="text-sm text-gray-500 mt-1">Automated forward-looking payment notices and overdue default warnings, shown here and delivered by email.</p>
             </div>
-            @if ($unreadCount > 0)
-                <div>
+            <div class="flex flex-wrap items-center gap-2">
+                <form method="POST" action="{{ route('reminders.email-summary') }}">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 shadow-sm transition"
+                    >
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Email Me This Summary
+                    </button>
+                </form>
+                @if ($unreadCount > 0)
                     <form method="POST" action="{{ route('reminders.read-all') }}">
                         @csrf
                         <button
@@ -19,8 +29,8 @@
                             Mark All As Read
                         </button>
                     </form>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </x-slot>
 

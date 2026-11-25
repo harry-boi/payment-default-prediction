@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\ObligationStatusSync;
+use App\Services\ReminderEmailService;
 use App\Services\ReminderGenerator;
 use App\Services\RiskAssessmentService;
 use Carbon\Carbon;
@@ -22,12 +23,12 @@ class ProcessDailyBills extends Command
      *
      * @var string
      */
-    protected $description = 'Run daily bill processing: synchronize obligation statuses, generate reminders, and refresh risk assessments (Section 10.5)';
+    protected $description = 'Run daily bill processing: synchronize obligation statuses, generate reminders, refresh risk assessments, and email reminder digests (Section 10.5)';
 
     /**
      * Execute the console command.
      */
-    public function handle(ReminderGenerator $reminderGenerator, RiskAssessmentService $riskAssessmentService): int
+    public function handle(ReminderGenerator $reminderGenerator, RiskAssessmentService $riskAssessmentService, ReminderEmailService $reminderEmailService): int
     {
         $dateOption = $this->option('date');
         $effectiveDate = $dateOption ? Carbon::parse($dateOption)->startOfDay() : Carbon::now()->startOfDay();
@@ -48,6 +49,16 @@ class ProcessDailyBills extends Command
         $this->comment('Step 3: Recalculating default risk scores for all open obligations...');
         $assessedCount = $riskAssessmentService->assessAllOpen($effectiveDate);
         $this->line(" -> {$assessedCount} open obligations evaluated.");
+
+        // 4. Email a digest of newly generated reminders to each income payer.
+        // A mail failure must never fail the daily run, so it is reported, not thrown.
+        $this->comment('Step 4: Emailing reminder digests for new reminders...');
+        if ($reminderEmailService->isConfigured()) {
+            $digestCount = $reminderEmailService->sendAllNewDigests();
+            $this->line(" -> {$digestCount} reminder digest emails sent.");
+        } else {
+            $this->line(' -> Email alerts are not configured (RESEND_API_KEY / MAIL_FROM_ADDRESS); skipped.');
+        }
 
         $this->info('Daily bill processing completed successfully.');
 

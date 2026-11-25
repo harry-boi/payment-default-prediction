@@ -28,6 +28,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+        'from' => env('MAIL_FROM_ADDRESS'),
+        'from_name' => env('MAIL_FROM_NAME', 'Smart Bill Reminder'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

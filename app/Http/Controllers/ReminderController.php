@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Reminder;
 use App\Services\ObligationStatusSync;
+use App\Services\ReminderEmailService;
 use App\Services\ReminderGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Throwable;
 
 class ReminderController extends Controller
 {
@@ -73,5 +75,32 @@ class ReminderController extends Controller
         $request->user()->reminders()->where('is_read', false)->update(['is_read' => true]);
 
         return back()->with('success', 'All notifications and alerts marked as read.');
+    }
+
+    /**
+     * Email a summary of the authenticated user's active reminders to them.
+     */
+    public function emailSummary(Request $request, ReminderGenerator $generator, ReminderEmailService $emailService): RedirectResponse
+    {
+        $user = $request->user();
+
+        ObligationStatusSync::syncForUser($user);
+        $generator->generateForUser($user);
+
+        if (! $emailService->isConfigured()) {
+            return back()->with('error', 'Email alerts are not configured yet. Set the Resend API key and the sender address first.');
+        }
+
+        try {
+            $emailedCount = $emailService->sendSummaryForUser($user);
+        } catch (Throwable $e) {
+            return back()->with('error', 'The reminder email could not be sent. Please try again.');
+        }
+
+        if ($emailedCount === 0) {
+            return back()->with('success', 'There are no active reminders to email right now.');
+        }
+
+        return back()->with('success', "Reminder summary emailed to {$user->email} ({$emailedCount} reminders included).");
     }
 }

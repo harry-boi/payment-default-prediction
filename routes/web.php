@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('reminders', [ReminderController::class, 'index'])->name('reminders.index');
     Route::patch('reminders/{reminder}/read', [ReminderController::class, 'markAsRead'])->name('reminders.read');
     Route::post('reminders/read-all', [ReminderController::class, 'markAllAsRead'])->name('reminders.read-all');
+    Route::post('reminders/email-summary', [ReminderController::class, 'emailSummary'])->name('reminders.email-summary');
 
     // Reports (Phase 8)
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
