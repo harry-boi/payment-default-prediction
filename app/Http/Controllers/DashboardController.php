@@ -56,6 +56,19 @@ class DashboardController extends Controller
             ->where('status', ObligationStatus::Overdue)
             ->count();
 
+        // 4b. Total amount overdue (for the post-login summary modal)
+        $overdueTotalKobo = (int) SalaryObligation::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
+            ->where('status', ObligationStatus::Overdue)
+            ->sum('amount');
+
+        // Post-login overdue summary modal: show once per session, only when
+        // there is at least one overdue payment.
+        $showOverdueModal = false;
+        if ($overdueCount > 0 && ! $request->session()->has('overdue_modal_shown')) {
+            $showOverdueModal = true;
+            $request->session()->put('overdue_modal_shown', true);
+        }
+
         // 5. Number of high-risk obligations
         $highRiskCount = SalaryObligation::whereHas('employee', fn ($q) => $q->where('user_id', $user->id))
             ->whereIn('status', [ObligationStatus::Upcoming, ObligationStatus::Overdue])
@@ -91,6 +104,8 @@ class DashboardController extends Controller
             'amountDueSoonKobo',
             'upcomingCount',
             'overdueCount',
+            'overdueTotalKobo',
+            'showOverdueModal',
             'highRiskCount',
             'upcomingObligations',
             'overdueObligations',

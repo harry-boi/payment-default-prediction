@@ -1,4 +1,77 @@
 <x-app-layout>
+    @if ($showOverdueModal)
+        <style>
+            @keyframes sbFadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes sbPopIn { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            #overdue-modal-backdrop { animation: sbFadeIn 0.25s ease-out both; }
+            #overdue-modal-panel { animation: sbPopIn 0.32s cubic-bezier(0.21, 1.02, 0.73, 1) both; }
+            #overdue-modal.closing #overdue-modal-backdrop { opacity: 0; transition: opacity 0.18s ease-in; }
+            #overdue-modal.closing #overdue-modal-panel { opacity: 0; transform: translateY(8px) scale(0.97); transition: all 0.18s ease-in; }
+        </style>
+        <div id="overdue-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="overdue-modal-title">
+            <div id="overdue-modal-backdrop" class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" data-close-overdue-modal></div>
+            <div id="overdue-modal-panel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="h-1.5 bg-gradient-to-r from-red-500 via-rose-500 to-amber-500"></div>
+                <button type="button" data-close-overdue-modal aria-label="Dismiss"
+                    class="absolute top-3 right-3 inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="p-6 sm:p-8">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-full bg-red-100">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 id="overdue-modal-title" class="text-lg font-bold text-gray-900">Overdue Payments</h3>
+                            <p class="mt-1 text-sm text-gray-600">
+                                You have <span class="font-bold text-red-600">{{ number_format($overdueCount) }} overdue {{ $overdueCount === 1 ? 'payment' : 'payments' }}</span>
+                                totalling <span class="font-bold text-gray-900">{{ \App\Support\Money::format($overdueTotalKobo) }}</span>.
+                            </p>
+                        </div>
+                    </div>
+                    @if ($overdueObligations->isNotEmpty())
+                        <ul class="mt-5 divide-y divide-gray-100 rounded-xl border border-gray-100 bg-gray-50/60 px-4">
+                            @foreach ($overdueObligations->take(3) as $ob)
+                                <li class="py-2.5 flex items-center justify-between text-sm">
+                                    <span class="font-medium text-gray-800">{{ $ob->employee->name }}</span>
+                                    <span class="text-gray-500">{{ \App\Support\Money::format($ob->amount) }} &middot; {{ abs($ob->daysRemaining()) }}d overdue</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        @if ($overdueCount > 3)
+                            <p class="mt-2 text-xs text-gray-400">And {{ $overdueCount - 3 }} more on the Reminders page.</p>
+                        @endif
+                    @endif
+                    <div class="mt-6 flex items-center justify-end gap-2">
+                        <a href="{{ route('salary-obligations.index', ['status' => 'overdue']) }}"
+                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 shadow-sm transition">
+                            View Overdue
+                        </a>
+                        <button type="button" data-close-overdue-modal
+                            class="inline-flex items-center px-5 py-2 bg-red-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 shadow-sm transition">
+                            Okay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            (function () {
+                var modal = document.getElementById('overdue-modal');
+                if (!modal) { return; }
+                function closeModal() {
+                    modal.classList.add('closing');
+                    setTimeout(function () { modal.style.display = 'none'; }, 190);
+                }
+                modal.querySelectorAll('[data-close-overdue-modal]').forEach(function (el) {
+                    el.addEventListener('click', closeModal);
+                });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && modal.style.display !== 'none') { closeModal(); }
+                });
+            })();
+        </script>
+    @endif
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
