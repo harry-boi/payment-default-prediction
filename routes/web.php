@@ -49,15 +49,3 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// TEMPORARY diagnostic (remove after email verification): reports only
-// whether each email setting is present and its length — never the value.
-Route::get('/config-check', function () {
-    $report = [];
-    foreach (['RESEND_API_KEY' => env('RESEND_API_KEY'), 'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'), 'MAIL_FROM_NAME' => env('MAIL_FROM_NAME')] as $name => $value) {
-        $report['env'][$name] = ['present' => ! empty($value), 'length' => $value ? strlen($value) : 0];
-    }
-    foreach (['key' => config('services.resend.key'), 'from' => config('services.resend.from'), 'from_name' => config('services.resend.from_name')] as $name => $value) {
-        $report['config'][$name] = ['present' => ! empty($value), 'length' => $value ? strlen($value) : 0];
-    }
-    return response()->json($report);
-});
